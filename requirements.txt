@@ -1,0 +1,36 @@
+# LangChain core
+langchain
+langchain-core
+langchain-classic
+langchain-community
+langchain-text-splitters
+
+# Local LLM - Ollama
+langchain-ollama
+ollama
+
+# Local embeddings
+sentence-transformers
+
+# Vector database
+faiss-cpu
+
+# Document loaders
+pymupdf
+pypdf
+docx2txt
+
+# Basic utilities
+python-dotenv
+
+#Text Extractor : 
+markitdown[pdf,docx]
+
+streamlit
+
+langchain-groq
+langchain-google-genai
+langchain-huggingface
+sentence-transformers
+
+rank_bm25
