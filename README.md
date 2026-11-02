@@ -32,45 +32,16 @@
   [![Live demo](https://img.shields.io/badge/Live%20Demo-Open%20App-22d3ee?style=for-the-badge&logo=streamlit&logoColor=white&labelColor=0b1220)](https://YOUR-VERIFIED-APP-URL.streamlit.app)
 -->
 
-<img src="assets/divider.svg" width="100%" alt=""/>
+## 🎬 Product walkthrough
 
-## 🎬 Demo
+NEXUS RAG follows a simple four-step workflow:
 
-<div align="center">
+1. **Upload and process** — add PDF, TXT, DOCX or CSV files from the sidebar and start indexing.
+2. **Knowledge base ready** — the app confirms that uploaded files have been processed for the current session.
+3. **Ask questions** — ask in natural language and receive answers based on retrieved passages.
+4. **Check the evidence** — review retrieved source information and verify the answer against the original document. When information is missing, the assistant is instructed to say so rather than invent an answer.
 
-<img src="assets/demo/nexus-rag-demo.gif" alt="NEXUS RAG product demo" width="270"/>
-
-<sub>Short product walkthrough &nbsp;•&nbsp; <a href="assets/demo/nexus-rag-demo.mp4">▶ Watch the full video with narration (MP4)</a></sub>
-
-</div>
-
-<br/>
-
-<table>
-<tr>
-<td width="50%" align="center">
-<img src="assets/screenshots/01-upload-and-process.png" alt="Upload and process documents"/>
-<br/><sub><b>1 · Upload &amp; process</b><br/>PDF, TXT, DOCX or CSV go in from the sidebar and are indexed with one click.</sub>
-</td>
-<td width="50%" align="center">
-<img src="assets/screenshots/02-knowledge-base-ready.png" alt="Knowledge base ready" width="220"/>
-<br/><sub><b>2 · Knowledge base ready</b><br/>The sidebar confirms the indexed files so you know what the assistant can see.</sub>
-</td>
-</tr>
-</table>
-
-<div align="center">
-<img src="assets/screenshots/04-grounded-answer.png" alt="Grounded answer with retrieved sources" width="92%"/>
-<br/><sub><b>3 · Grounded answers with sources</b> - the reply ends with <code>fetched from → hostel_policy.txt</code> and a <i>Retrieved sources</i> panel.</sub>
-<br/><br/>
-<img src="assets/screenshots/06-answer-not-in-documents.png" alt="Assistant declines when the answer is not in the documents" width="92%"/>
-<br/><sub><b>4 · It says so when the answer isn't there</b> - no invented refund policy, just an honest "the uploaded documents do not contain…".</sub>
-</div>
-
-> [!NOTE]
-> The screenshots use a small demo corpus of eight campus-policy `.txt` files (academic, attendance, examination, hostel, library, placement, scholarship, student services).
-
-<img src="assets/divider.svg" width="100%" alt=""/>
+> **Demo corpus note:** The example walkthrough uses eight campus-policy text files covering academic, attendance, examination, hostel, library, placement, scholarship and student-services topics.
 
 ## ✨ Features
 
@@ -137,19 +108,9 @@ Wide layout, custom CSS theme, project logo and a clear *upload → process → 
 </tr>
 </table>
 
-<div align="center">
-<img src="assets/stack.svg" width="100%" alt="Technology stack"/>
-</div>
-
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## 🧠 How it works
 
 NEXUS RAG runs two phases: a one-time **ingestion** phase when you process documents, and a **question-answering** phase for every question you ask.
-
-<div align="center">
-<img src="assets/pipeline.svg" width="100%" alt="NEXUS RAG pipeline: ingestion and question answering"/>
-</div>
 
 <br/>
 
@@ -232,15 +193,9 @@ sequenceDiagram
 
 </details>
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## ⚖️ Hybrid retrieval
 
 Keyword search is great at exact terms; vector search is great at *different wording for the same idea*. NEXUS RAG runs both and fuses them.
-
-<div align="center">
-<img src="assets/hybrid.svg" width="100%" alt="BM25 and FAISS fused by EnsembleRetriever"/>
-</div>
 
 <br/>
 
@@ -253,8 +208,6 @@ Keyword search is great at exact terms; vector search is great at *different wor
 
 > [!TIP]
 > The 0.5 / 0.5 weights and the 1000 / 200 chunking are a balanced **starting point**, not a proven optimum. Use `evaluation.py` and `test_dataset.csv` to tune them against your own questions.
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## 🧰 Tech stack
 
@@ -274,8 +227,6 @@ Keyword search is great at exact terms; vector search is great at *different wor
 
 > [!NOTE]
 > Model identifiers and provider availability change over time. If initialisation fails, check the currently supported model IDs with Groq and Google.
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## 🚀 Quick start
 
@@ -335,8 +286,6 @@ streamlit run app.py
 > [!WARNING]
 > Never commit real API keys. `.env` and `.streamlit/secrets.toml` are git-ignored, but `.gitignore` cannot remove a secret that was already committed - if one leaks, **revoke and rotate it** with the provider.
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## ☁️ Deploy on Streamlit Community Cloud
 
 1. Push the latest code to the `main` branch of your repository.
@@ -355,8 +304,6 @@ streamlit run app.py
 > [!NOTE]
 > Community Cloud filesystems are ephemeral: indexes and uploads can disappear after a restart or rebuild. That's fine for a demo, but not for persistent storage.
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## ⚙️ Configuration at a glance
 
 | Setting | Value | Where it matters |
@@ -370,8 +317,6 @@ streamlit run app.py
 | Primary LLM | Groq `openai/gpt-oss-120b` | Answer generation |
 | Fallback LLM | Gemini `gemini-3.6-flash` | Used if the primary call fails |
 | Index location | UUID-based per-session path | Keeps concurrent sessions' indexes apart |
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## 📁 Project structure
 
@@ -389,8 +334,6 @@ nexus-rag/
     └── logo.png           # Logo used by the interface
 ```
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## 🔒 Security &amp; privacy
 
 - 🔑 API keys are supplied through **Streamlit secrets** or environment variables - never in source code.
@@ -400,8 +343,6 @@ nexus-rag/
 
 > [!CAUTION]
 > The code loads FAISS indexes with `allow_dangerous_deserialization=True`. Only load indexes **created by this app** - never a FAISS file from an unknown source.
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## 🧭 Honest limitations
 
@@ -422,8 +363,6 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 - **Prompting reduces, but can't eliminate, hallucinations.**
 
 </details>
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## 🗺️ Roadmap
 
@@ -458,8 +397,6 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 - [ ] Sample-document / demo mode
 - [ ] Improved mobile layout and accessibility
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## 🧪 Evaluation
 
 The repo includes `evaluation.py`, `test.py` and `test_dataset.csv`. No accuracy, latency or capacity numbers are published here because none have been formally verified. Recommended dimensions to measure:
@@ -471,8 +408,6 @@ The repo includes `evaluation.py`, `test.py` and `test_dataset.csv`. No accuracy
 | **Abstention** | When the answer isn't in the documents, does it clearly say so instead of guessing? |
 | **Source quality** | Does the shown filename match the document that supplied the evidence? |
 | **Performance** | How do indexing and query time change with file size, file count and concurrent users? |
-
-<img src="assets/divider.svg" width="100%" alt=""/>
 
 ## ❓ FAQ
 
@@ -512,8 +447,6 @@ Not reliably - image-only PDFs have no extractable text and OCR isn't part of th
 Uploads go through temporary storage and indexes live on the host's local filesystem for the session. Question text and retrieved passages are sent to the configured LLM providers.
 </details>
 
-<img src="assets/divider.svg" width="100%" alt=""/>
-
 ## 🎤 Project summary
 
 > *NEXUS RAG is a document question-answering application built with Python, Streamlit, LangChain, Qwen3 embeddings and FAISS. It combines BM25 keyword search with FAISS semantic search through an `EnsembleRetriever`, and uses Groq with a Gemini fallback to generate answers grounded in uploaded PDF, TXT, DOCX and CSV documents.*
@@ -541,6 +474,3 @@ If NEXUS RAG helped or inspired you, a ⭐ on the repo means a lot!
 
 <br/>
 
-<div align="center">
-<img src="assets/footer.svg" width="100%" alt="NEXUS RAG - turning documents into answers"/>
-</div>
