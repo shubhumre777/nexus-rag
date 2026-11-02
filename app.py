@@ -383,7 +383,7 @@ else:
         </style>
 
         <div class="aesthetic-upload-text">
-            ✨ <<<---  Please Upload your documents first ✨
+            <<<--- ✨ Please Upload your documents first ✨
         </div>
         """,
         unsafe_allow_html=True
