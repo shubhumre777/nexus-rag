@@ -397,17 +397,62 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 - [ ] Sample-document / demo mode
 - [ ] Improved mobile layout and accessibility
 
-## 🧪 Evaluation
+## 🧪 RAGAS evaluation
 
-The repo includes `evaluation.py`, `test.py` and `test_dataset.csv`. No accuracy, latency or capacity numbers are published here because none have been formally verified. Recommended dimensions to measure:
+NEXUS RAG now includes an initial **RAGAS evaluation baseline** using the hybrid retriever (FAISS + BM25). The first reported run evaluated **6 questions** from the local test dataset.
 
-| Dimension | Question to answer |
-|---|---|
-| **Retrieval quality** | Does the right chunk come back, and near the top? Does hybrid beat BM25-only / FAISS-only? |
-| **Answer correctness** | Is every claim supported by the retrieved context? Are names, dates and values preserved? |
-| **Abstention** | When the answer isn't in the documents, does it clearly say so instead of guessing? |
-| **Source quality** | Does the shown filename match the document that supplied the evidence? |
-| **Performance** | How do indexing and query time change with file size, file count and concurrent users? |
+<div align="center">
+
+<img src="assets/ragas-evaluation-results.svg" alt="NEXUS RAG first RAGAS evaluation scores" width="100%"/>
+
+</div>
+
+### First evaluation results
+
+| RAGAS metric | Score | Questions evaluated | What it measures |
+|---|---:|---:|---|
+| **Faithfulness** | **0.792** | 6 | Whether the generated answer is supported by retrieved context |
+| **Answer relevancy** | **0.835** | 6 | Whether the answer addresses the user's question |
+| **Context precision** | **1.000** | 3 | Whether relevant retrieved context is ranked well |
+| **Context recall** | **1.000** | 3 | Whether retrieved context contains the information needed for the reference answer |
+
+<div align="center">
+
+<img src="assets/ragas-evaluation-coverage.svg" alt="NEXUS RAG evaluation dataset coverage and configuration" width="100%"/>
+
+</div>
+
+### Evaluation setup
+
+- **Evaluation framework:** RAGAS
+- **Retriever:** LangChain EnsembleRetriever combining FAISS semantic search and BM25 keyword search
+- **Ensemble weights:** FAISS 0.5 / BM25 0.5
+- **Top-K:** 5
+- **Answer model:** Groq `openai/gpt-oss-120b` (Gemini configured as fallback in the application)
+- **Evaluation judge:** Groq OpenAI-compatible API
+- **Dataset:** 6 questions — 3 answerable and 3 unanswerable
+
+The question-level scores are recorded in [`evaluation/first-ragas-run.csv`](evaluation/first-ragas-run.csv).
+
+> [!IMPORTANT]
+> These are the results of an **initial, small-sample baseline**, not a general accuracy claim or a production benchmark. Context Precision and Context Recall were calculated only for the **3 answerable questions**; Faithfulness and Answer Relevancy were calculated for all **6 questions**. A larger, human-verified test set is needed before drawing strong conclusions.
+
+### What the first run suggests
+
+- **Faithfulness (0.792)** is the first area to investigate: inspect answer claims that may not be fully supported by the retrieved passages.
+- **Answer relevancy (0.835)** provides a baseline for how directly the answers address the questions.
+- **Context Precision and Recall (1.000 each)** are encouraging on the three answerable test cases, but the sample is too small to establish robust retrieval performance.
+
+### Reproduce the evaluation
+
+Install the evaluation dependencies and prepare the local FAISS index and test dataset:
+
+```bash
+pip install -U ragas pandas openai sentence-transformers python-dotenv
+python evaluation.py
+```
+
+See [`evaluation.py`](evaluation.py) and [`test_dataset.csv`](test_dataset.csv). The script evaluates the local index; the same source documents used to build that index must be available for the test questions.
 
 ## ❓ FAQ
 
