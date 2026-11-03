@@ -1,0 +1,5 @@
+metric,score,questions_evaluated,interpretation
+faithfulness,0.792,6,Measures whether generated answer claims are supported by retrieved context
+answer_relevancy,0.835,6,Measures whether answers address the user questions
+context_precision,1.000,3,Calculated on answerable questions only
+context_recall,1.000,3,Calculated on answerable questions only
