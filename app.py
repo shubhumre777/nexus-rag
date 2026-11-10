@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 
 import streamlit as st
+from langchain_community.embeddings import FastEmbedEmbeddings
 
 from rag import Rag
 
@@ -15,6 +16,17 @@ st.set_page_config(
     page_icon="📱",
     layout="wide"
 )
+
+@st.cache_resource(scope="session")
+def get_embedding_model():
+    return FastEmbedEmbeddings(
+        model_name="BAAI/bge-small-en-v1.5",
+        batch_size=64,
+        threads=2,
+        max_length=512
+    )
+
+
 
 # Read API keys from Streamlit secrets when deployed.
 for key in ("GROQ_API_KEY", "GOOGLE_API_KEY"):
@@ -67,7 +79,10 @@ def process_documents(uploaded_files):
     index_path = Path("user_indexes") / new_index_id
 
     try:
-        rag = Rag(index_path=str(index_path))
+        rag = Rag(
+            index_path=str(index_path),
+            embeddings=get_embedding_model()
+        )
 
         for uploaded_file in uploaded_files:
             safe_name = Path(uploaded_file.name).name
