@@ -7,3 +7,4 @@ venv/
 faiss_index/
 user_indexes/
 evaluation_results.csv
+faiss_index_bge/
