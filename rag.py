@@ -17,7 +17,7 @@ from langchain_community.document_loaders import (
     CSVLoader,
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
@@ -28,14 +28,16 @@ from langchain_community.retrievers import BM25Retriever
 
 class Rag:
 
-    def __init__(self, index_path="faiss_index"):
+    def __init__(self, index_path="faiss_index_bge", embeddings=None):
 
         self.index_path = index_path
-        self.embedding_model_name = "Qwen/Qwen3-Embedding-0.6B"
+        self.embedding_model_name = "BAAI/bge-small-en-v1.5"
 
-        self.embeddings = HuggingFaceEmbeddings(
+        self.embeddings = embeddings if embeddings is not None else FastEmbedEmbeddings(
             model_name=self.embedding_model_name,
-            encode_kwargs={"normalize_embeddings": True}
+            batch_size=64,
+            threads=2,
+            max_length=512
         )
 
         groq_api_key = os.getenv("GROQ_API_KEY")
@@ -150,7 +152,7 @@ class Rag:
 
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
-            chunk_overlap=200,
+            chunk_overlap=100,
             length_function=len
         )
 
@@ -264,6 +266,10 @@ class Rag:
             HumanMessage(content=question),
             AIMessage(content=response)
         ])
+
+        # Keep only the latest 8 messages (4 user/assistant exchanges).
+        if len(history) > 8:
+            del history[:-8]
 
         return response
 
