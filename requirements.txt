@@ -10,6 +10,7 @@ langchain-ollama
 ollama
 
 # Local embeddings
+fastembed
 sentence-transformers
 
 # Vector database
