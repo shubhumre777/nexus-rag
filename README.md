@@ -14,7 +14,7 @@
 [![FAISS](https://img.shields.io/badge/FAISS-Vector%20Search-0467DF?style=for-the-badge&logo=meta&logoColor=white&labelColor=0b1220)](https://github.com/facebookresearch/faiss)
 [![Groq](https://img.shields.io/badge/Groq-Primary%20LLM-F55036?style=for-the-badge&logoColor=white&labelColor=0b1220)](https://groq.com/)
 [![Gemini](https://img.shields.io/badge/Gemini-Fallback%20LLM-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white&labelColor=0b1220)](https://ai.google.dev/)
-[![HuggingFace](https://img.shields.io/badge/Qwen3-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)
+[![HuggingFace](https://img.shields.io/badge/Qwen3-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/Qwen/BAAI/bge-small-en-v1.5)
 
 [![Stars](https://img.shields.io/github/stars/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=22d3ee&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/stargazers)
 [![Forks](https://img.shields.io/github/forks/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=3b82f6&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/network/members)
@@ -56,7 +56,7 @@ Upload **PDF, TXT, DOCX and CSV** files - up to **10 files** per session with a 
 <td width="33%" valign="top">
 
 ### 🧬 Semantic embeddings
-Chunks are embedded with **Qwen3-Embedding-0.6B** and indexed in **FAISS** for similarity search by *meaning*.
+Chunks are embedded with **BAAI/bge-small-en-v1.5** and indexed in **FAISS** for similarity search by *meaning*.
 
 </td>
 <td width="33%" valign="top">
@@ -125,8 +125,8 @@ flowchart LR
         direction TB
         UP["📤 Upload<br/>PDF · TXT · DOCX · CSV"] --> TMP["🗂️ Temporary files"]
         TMP --> LOAD["📚 Loaders<br/>PyPDF · Text · Docx2txt · CSV"]
-        LOAD --> SPLIT["✂️ Chunking<br/>size 1000 · overlap 200"]
-        SPLIT --> EMB["🧬 Qwen3-Embedding-0.6B"]
+        LOAD --> SPLIT["✂️ Chunking<br/>size 1000 · overlap 100"]
+        SPLIT --> EMB["🧬 BAAI/bge-small-en-v1.5"]
         EMB --> FAISS[("📦 FAISS index")]
         SPLIT --> BM25[("🔤 BM25 retriever")]
     end
@@ -172,7 +172,7 @@ sequenceDiagram
     participant LLM as Groq → Gemini fallback
 
     User->>UI: Upload files + click "Process documents"
-    UI->>RAG: Load → chunk (1000/200) → embed → index
+    UI->>RAG: Load → chunk (1000/100) → embed → index
     RAG-->>UI: index_ready = true
 
     User->>UI: Ask a question
@@ -199,7 +199,7 @@ Keyword search is great at exact terms; vector search is great at *different wor
 
 <br/>
 
-| | 🔤 **BM25** | 🧭 **FAISS** (Qwen3 vectors) |
+| | 🔤 **BM25** | 🧭 **FAISS** (BGE vectors) |
 |---|---|---|
 | **Finds** | Passages containing the query's important *words* | Passages with a similar *meaning* |
 | **Best for** | Names, IDs, policy terms, exact phrases | Paraphrases and alternative wording |
@@ -207,7 +207,7 @@ Keyword search is great at exact terms; vector search is great at *different wor
 | **Weight** | `0.5` | `0.5` |
 
 > [!TIP]
-> The 0.5 / 0.5 weights and the 1000 / 200 chunking are a balanced **starting point**, not a proven optimum. Use `evaluation.py` and `test_dataset.csv` to tune them against your own questions.
+> The 0.5 / 0.5 weights and the 1000 / 100 chunking are a balanced **starting point**, not a proven optimum. Use `evaluation.py` and `test_dataset.csv` to tune them against your own questions.
 
 ## 🧰 Tech stack
 
@@ -216,7 +216,7 @@ Keyword search is great at exact terms; vector search is great at *different wor
 | **Language** | Python 3.11 | Application and RAG logic |
 | **UI** | Streamlit + custom CSS | Upload workflow, chat interface, session state |
 | **Orchestration** | LangChain (`core`, `community`, `classic`, `text-splitters`) | Loaders, splitting, retrievers, prompts, model wiring |
-| **Embeddings** | `Qwen/Qwen3-Embedding-0.6B` via `sentence-transformers` / `langchain-huggingface` | Turns chunks and questions into vectors |
+| **Embeddings** | `Qwen/BAAI/bge-small-en-v1.5` via `sentence-transformers` / `langchain-huggingface` | Turns chunks and questions into vectors |
 | **Vector index** | FAISS (`faiss-cpu`) | Similarity search over chunk embeddings |
 | **Keyword search** | `BM25Retriever` (`rank_bm25`) | Keyword relevance retrieval |
 | **Fusion** | `EnsembleRetriever` | Weighted combination of BM25 + FAISS |
@@ -311,8 +311,8 @@ streamlit run app.py
 | Supported files | `.pdf` `.txt` `.docx` `.csv` | Upload widget |
 | Max files / size | 10 files / 20 MB | Upload limits in `app.py` (host limits may also apply) |
 | Chunk size | `1000` | Text splitting |
-| Chunk overlap | `200` | Keeps context across chunk boundaries |
-| Embedding model | `Qwen/Qwen3-Embedding-0.6B` | Vector retrieval |
+| Chunk overlap | `100` | Keeps context across chunk boundaries |
+| Embedding model | `Qwen/BAAI/bge-small-en-v1.5` | Vector retrieval |
 | Retriever weights | BM25 `0.5` · FAISS `0.5` | `EnsembleRetriever` |
 | Primary LLM | Groq `openai/gpt-oss-120b` | Answer generation |
 | Fallback LLM | Gemini `gemini-3.6-flash` | Used if the primary call fails |
@@ -354,7 +354,7 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 - **No authentication or tenant isolation** - UUID index paths separate sessions, but that is not production-grade access control.
 - **In-memory chat history** - lost on restart or new session; there is no database.
 - **Ephemeral hosting storage** - Community Cloud files and indexes should not be assumed durable.
-- **Retrieval quality isn't guaranteed** - 0.5 / 0.5 weights and 1000 / 200 chunking are unvalidated defaults.
+- **Retrieval quality isn't guaranteed** - 0.5 / 0.5 weights and 1000 / 100 chunking are unvalidated defaults.
 - **Source attribution is model-generated** - the `fetched from → file` line comes from the LLM and is parsed by the UI; it is *not* a structured, page-level citation.
 - **Scanned PDFs** - image-only PDFs have no extractable text; OCR isn't part of the ingestion path.
 - **Scale unknown** - no load tests, latency numbers, or concurrent-user capacity have been measured.
@@ -399,7 +399,7 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 
 ## 🧪 RAGAS evaluation
 
-NEXUS RAG now includes an initial **RAGAS evaluation baseline** using the hybrid retriever (FAISS + BM25). The first reported run evaluated **6 questions** from the local test dataset.
+NEXUS RAG now includes an initial **RAGAS evaluation baseline** using the hybrid retriever (FAISS + BM25). The README records an earlier **6-question baseline**. Important reproducibility note: the current `evaluation.py` is configured with `TEST_LIMIT = 3`, retrieves directly from FAISS (`k=4`) rather than the live FAISS + BM25 ensemble (`k=5`), and configures a separate Qwen3 evaluator embedding. Therefore, running the current script does **not** reproduce the historical six-question hybrid-retriever baseline below. Treat the published scores as a historical reported result, not a currently reproducible benchmark.
 
 <div align="center">
 
@@ -425,9 +425,8 @@ NEXUS RAG now includes an initial **RAGAS evaluation baseline** using the hybrid
 ### Evaluation setup
 
 - **Evaluation framework:** RAGAS
-- **Retriever:** LangChain EnsembleRetriever combining FAISS semantic search and BM25 keyword search
-- **Ensemble weights:** FAISS 0.5 / BM25 0.5
-- **Top-K:** 5
+- **Retriever for the historical reported run:** README records LangChain EnsembleRetriever (FAISS + BM25), weights 0.5 / 0.5, Top-K 5.
+- **Current evaluation script:** direct FAISS retrieval, Top-K 4, first 3 rows only; it is not aligned with that historical run.
 - **Answer model:** Groq `openai/gpt-oss-120b` (Gemini configured as fallback in the application)
 - **Evaluation judge:** Groq OpenAI-compatible API
 - **Dataset:** 6 questions — 3 answerable and 3 unanswerable
@@ -465,7 +464,7 @@ BM25 reliably finds exact terms (names, IDs, policy phrases); FAISS finds passag
 <details>
 <summary><b>What's the difference between the embedding model and the LLM?</b></summary>
 <br/>
-<b>Qwen3-Embedding-0.6B</b> converts text into vectors for search - it never writes answers. <b>Groq / Gemini</b> read the retrieved context and write the reply.
+<b>BAAI/bge-small-en-v1.5</b> converts text into vectors for search - it never writes answers. <b>Groq / Gemini</b> read the retrieved context and write the reply.
 </details>
 
 <details>
