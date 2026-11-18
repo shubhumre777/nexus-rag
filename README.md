@@ -14,7 +14,7 @@
 [![FAISS](https://img.shields.io/badge/FAISS-Vector%20Search-0467DF?style=for-the-badge&logo=meta&logoColor=white&labelColor=0b1220)](https://github.com/facebookresearch/faiss)
 [![Groq](https://img.shields.io/badge/Groq-Primary%20LLM-F55036?style=for-the-badge&logoColor=white&labelColor=0b1220)](https://groq.com/)
 [![Gemini](https://img.shields.io/badge/Gemini-Fallback%20LLM-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white&labelColor=0b1220)](https://ai.google.dev/)
-[![HuggingFace](https://img.shields.io/badge/Qwen3-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/BAAI/bge-small-en-v1.5)
+[![HuggingFace](https://img.shields.io/badge/BGE--small-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/BAAI/bge-small-en-v1.5)
 
 [![Stars](https://img.shields.io/github/stars/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=22d3ee&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/stargazers)
 [![Forks](https://img.shields.io/github/forks/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=3b82f6&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/network/members)
@@ -216,7 +216,7 @@ Keyword search is great at exact terms; vector search is great at *different wor
 | **Language** | Python 3.11 | Application and RAG logic |
 | **UI** | Streamlit + custom CSS | Upload workflow, chat interface, session state |
 | **Orchestration** | LangChain (`core`, `community`, `classic`, `text-splitters`) | Loaders, splitting, retrievers, prompts, model wiring |
-| **Embeddings** | `Qwen/BAAI/bge-small-en-v1.5` via `sentence-transformers` / `langchain-huggingface` | Turns chunks and questions into vectors |
+| **Embeddings** | `BAAI/bge-small-en-v1.5` via FastEmbed / ONNX Runtime | Turns chunks and questions into 384-dimensional vectors |
 | **Vector index** | FAISS (`faiss-cpu`) | Similarity search over chunk embeddings |
 | **Keyword search** | `BM25Retriever` (`rank_bm25`) | Keyword relevance retrieval |
 | **Fusion** | `EnsembleRetriever` | Weighted combination of BM25 + FAISS |
