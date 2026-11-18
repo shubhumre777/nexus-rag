@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="730" viewBox="0 0 1200 730" role="img" aria-labelledby="title desc">
-<title id="title">NEXUS RAG 50-question RAGAS evaluation status</title>
-<desc id="desc">A 50-question evaluation suite is configured. Faithfulness and answer relevancy target all 50 questions. Context precision and context recall target the 46 answerable questions. Scores are pending until the evaluation is run.</desc>
+<title id="title">NEXUS RAG historical RAGAS baseline results</title>
+<desc id="desc">Historical RAGAS baseline: Faithfulness 0.792 and Answer Relevancy 0.835 on six questions; Context Precision and Context Recall 1.000 on three answerable questions. A separate expanded dataset of 50 questions is configured; its results are not yet available.</desc>
 <defs>
  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#172554"/></linearGradient>
  <linearGradient id="a" x1="0" x2="1"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
@@ -12,38 +12,38 @@
 <rect width="1200" height="730" rx="30" fill="url(#bg)"/>
 <circle cx="1090" cy="70" r="120" fill="#7c3aed" opacity=".13" filter="url(#shadow)"/>
 <circle cx="80" cy="660" r="130" fill="#06b6d4" opacity=".10" filter="url(#shadow)"/>
-<text x="64" y="72" fill="#a5b4fc" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="3">NEXUS RAG · 50-QUESTION EVALUATION</text>
-<text x="64" y="128" fill="#ffffff" font-family="Arial,sans-serif" font-size="42" font-weight="700">RAGAS benchmark dashboard</text>
-<text x="64" y="166" fill="#cbd5e1" font-family="Arial,sans-serif" font-size="18">Evaluation configured · awaiting first complete 50-question run</text>
+<text x="64" y="72" fill="#a5b4fc" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="3">NEXUS RAG · RAGAS EVALUATION</text>
+<text x="64" y="128" fill="#ffffff" font-family="Arial,sans-serif" font-size="42" font-weight="700">Historical baseline scores</text>
+<text x="64" y="166" fill="#cbd5e1" font-family="Arial,sans-serif" font-size="18">Previously reported measurements · not 50-question results</text>
 <rect x="900" y="48" width="236" height="82" rx="18" fill="#0f766e" opacity=".25" stroke="#2dd4bf"/>
-<text x="924" y="78" fill="#99f6e4" font-family="Arial,sans-serif" font-size="14" font-weight="700">TEST SET</text>
+<text x="924" y="78" fill="#99f6e4" font-family="Arial,sans-serif" font-size="14" font-weight="700">EXPANDED TEST SET</text>
 <text x="924" y="112" fill="#ffffff" font-family="Arial,sans-serif" font-size="29" font-weight="700">50 questions</text>
 <g font-family="Arial,sans-serif">
  <text x="64" y="230" fill="#e2e8f0" font-size="18" font-weight="700">METRIC</text>
  <text x="390" y="230" fill="#94a3b8" font-size="14">SCORE (0–1)</text>
- <text x="1090" y="230" fill="#94a3b8" font-size="14" text-anchor="end">STATUS</text>
+ <text x="1090" y="230" fill="#94a3b8" font-size="14" text-anchor="end">BASELINE SCORE</text>
  <g stroke="#334155" stroke-dasharray="4 8">
   <line x1="390" y1="248" x2="390" y2="572"/><line x1="555" y1="248" x2="555" y2="572"/><line x1="720" y1="248" x2="720" y2="572"/><line x1="885" y1="248" x2="885" y2="572"/><line x1="1050" y1="248" x2="1050" y2="572"/>
  </g>
  <g fill="#64748b" font-size="13"><text x="390" y="595" text-anchor="middle">0.00</text><text x="555" y="595" text-anchor="middle">0.25</text><text x="720" y="595" text-anchor="middle">0.50</text><text x="885" y="595" text-anchor="middle">0.75</text><text x="1050" y="595" text-anchor="middle">1.00</text></g>
  <text x="64" y="300" fill="#f8fafc" font-size="21" font-weight="700">Faithfulness</text>
- <text x="64" y="325" fill="#94a3b8" font-size="14">Answer grounding · target n=50</text>
- <rect x="390" y="276" width="660" height="34" rx="17" fill="#1e293b" stroke="#475569" stroke-dasharray="5 6"/>
- <text x="1090" y="302" fill="#c4b5fd" font-size="20" font-weight="700" text-anchor="end">PENDING</text>
+ <text x="64" y="325" fill="#94a3b8" font-size="14">Answer grounding · n=6</text>
+ <rect x="390" y="276" width="660" height="34" rx="17" fill="#1e293b"/><rect x="390" y="276" width="522.72" height="34" rx="17" fill="url(#a)"/>
+ <text x="1090" y="302" fill="#e9d5ff" font-size="24" font-weight="700" text-anchor="end">0.792</text>
  <text x="64" y="382" fill="#f8fafc" font-size="21" font-weight="700">Answer relevancy</text>
- <text x="64" y="407" fill="#94a3b8" font-size="14">Question alignment · target n=50</text>
- <rect x="390" y="358" width="660" height="34" rx="17" fill="#1e293b" stroke="#475569" stroke-dasharray="5 6"/>
- <text x="1090" y="384" fill="#67e8f9" font-size="20" font-weight="700" text-anchor="end">PENDING</text>
+ <text x="64" y="407" fill="#94a3b8" font-size="14">Question alignment · n=6</text>
+ <rect x="390" y="358" width="660" height="34" rx="17" fill="#1e293b"/><rect x="390" y="358" width="551.1" height="34" rx="17" fill="url(#b)"/>
+ <text x="1090" y="384" fill="#a5f3fc" font-size="24" font-weight="700" text-anchor="end">0.835</text>
  <text x="64" y="464" fill="#f8fafc" font-size="21" font-weight="700">Context precision</text>
- <text x="64" y="489" fill="#94a3b8" font-size="14">Retrieval ranking · target n=46 answerable</text>
- <rect x="390" y="440" width="660" height="34" rx="17" fill="#1e293b" stroke="#475569" stroke-dasharray="5 6"/>
- <text x="1090" y="466" fill="#6ee7b7" font-size="20" font-weight="700" text-anchor="end">PENDING</text>
+ <text x="64" y="489" fill="#94a3b8" font-size="14">Retrieval ranking · n=3 answerable</text>
+ <rect x="390" y="440" width="660" height="34" rx="17" fill="#1e293b"/><rect x="390" y="440" width="660" height="34" rx="17" fill="url(#c)"/>
+ <text x="1090" y="466" fill="#a7f3d0" font-size="24" font-weight="700" text-anchor="end">1.000</text>
  <text x="64" y="546" fill="#f8fafc" font-size="21" font-weight="700">Context recall</text>
- <text x="64" y="571" fill="#94a3b8" font-size="14">Evidence coverage · target n=46 answerable</text>
- <rect x="390" y="522" width="660" height="34" rx="17" fill="#1e293b" stroke="#475569" stroke-dasharray="5 6"/>
- <text x="1090" y="548" fill="#fcd34d" font-size="20" font-weight="700" text-anchor="end">PENDING</text>
+ <text x="64" y="571" fill="#94a3b8" font-size="14">Evidence coverage · n=3 answerable</text>
+ <rect x="390" y="522" width="660" height="34" rx="17" fill="#1e293b"/><rect x="390" y="522" width="660" height="34" rx="17" fill="url(#d)"/>
+ <text x="1090" y="548" fill="#fde68a" font-size="24" font-weight="700" text-anchor="end">1.000</text>
 </g>
 <line x1="64" y1="630" x2="1136" y2="630" stroke="#334155"/>
-<text x="64" y="662" fill="#cbd5e1" font-family="Arial,sans-serif" font-size="15">Configured dataset: 50 questions · 46 answerable · 4 unanswerable.</text>
-<text x="64" y="690" fill="#94a3b8" font-family="Arial,sans-serif" font-size="14">Scores intentionally remain blank until evaluation.py completes; no 50-question result is being assumed.</text>
+<text x="64" y="662" fill="#cbd5e1" font-family="Arial,sans-serif" font-size="15">Historical baseline: 6 total questions · 3 answerable for Context Precision / Recall.</text>
+<text x="64" y="690" fill="#94a3b8" font-family="Arial,sans-serif" font-size="14">The separate expanded 50-question run is pending; these scores are not projected or assumed 50-question results.</text>
 </svg>
