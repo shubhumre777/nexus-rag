@@ -116,9 +116,11 @@ async def main():
         }
 
         try:
-            # Use the app's hybrid retriever (not FAISS-only retrieval).
+            # Match the app: ask both retrievers for TOP_K, then fuse their results.
+            bm25_retriever, faiss_retriever = rag.ensemble_retriever.retrievers
+            bm25_retriever.k = TOP_K
+            faiss_retriever.search_kwargs["k"] = TOP_K
             docs = rag.ensemble_retriever.invoke(question)
-            docs = docs[:TOP_K]
 
             contexts = [doc.page_content for doc in docs]
             sources = list(dict.fromkeys(
