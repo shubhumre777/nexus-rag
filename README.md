@@ -14,7 +14,7 @@
 [![FAISS](https://img.shields.io/badge/FAISS-Vector%20Search-0467DF?style=for-the-badge&logo=meta&logoColor=white&labelColor=0b1220)](https://github.com/facebookresearch/faiss)
 [![Groq](https://img.shields.io/badge/Groq-Primary%20LLM-F55036?style=for-the-badge&logoColor=white&labelColor=0b1220)](https://groq.com/)
 [![Gemini](https://img.shields.io/badge/Gemini-Fallback%20LLM-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white&labelColor=0b1220)](https://ai.google.dev/)
-[![HuggingFace](https://img.shields.io/badge/Qwen3-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/Qwen/BAAI/bge-small-en-v1.5)
+[![HuggingFace](https://img.shields.io/badge/Qwen3-Embeddings-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=0b1220)](https://huggingface.co/BAAI/bge-small-en-v1.5)
 
 [![Stars](https://img.shields.io/github/stars/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=22d3ee&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/stargazers)
 [![Forks](https://img.shields.io/github/forks/shubhumre777/nexus-rag?style=for-the-badge&logo=github&color=3b82f6&labelColor=0b1220)](https://github.com/shubhumre777/nexus-rag/network/members)
@@ -312,7 +312,7 @@ streamlit run app.py
 | Max files / size | 10 files / 20 MB | Upload limits in `app.py` (host limits may also apply) |
 | Chunk size | `1000` | Text splitting |
 | Chunk overlap | `100` | Keeps context across chunk boundaries |
-| Embedding model | `Qwen/BAAI/bge-small-en-v1.5` | Vector retrieval |
+| Embedding model | `BAAI/bge-small-en-v1.5` via FastEmbed | Vector retrieval |
 | Retriever weights | BM25 `0.5` · FAISS `0.5` | `EnsembleRetriever` |
 | Primary LLM | Groq `openai/gpt-oss-120b` | Answer generation |
 | Fallback LLM | Gemini `gemini-3.6-flash` | Used if the primary call fails |
@@ -399,59 +399,61 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 
 ## 🧪 RAGAS evaluation
 
-NEXUS RAG now includes an initial **RAGAS evaluation baseline** using the hybrid retriever (FAISS + BM25). The README records an earlier **6-question baseline**. Important reproducibility note: the current `evaluation.py` is configured with `TEST_LIMIT = 3`, retrieves directly from FAISS (`k=4`) rather than the live FAISS + BM25 ensemble (`k=5`), and configures a separate Qwen3 evaluator embedding. Therefore, running the current script does **not** reproduce the historical six-question hybrid-retriever baseline below. Treat the published scores as a historical reported result, not a currently reproducible benchmark.
+NEXUS RAG includes a **50-question evaluation dataset** in [`test_dataset.csv`](test_dataset.csv). The dataset contains **46 answerable** and **4 unanswerable** questions covering the campus-policy topics represented in the test set.
+
+The evaluation script now uses the same **FAISS + BM25 EnsembleRetriever** as the application, with the same 0.5 / 0.5 fusion weights and Top-K 5 setting for each retriever. It no longer limits evaluation to a subset of the CSV.
 
 <div align="center">
 
-<img src="assets/ragas-evaluation-results.svg" alt="NEXUS RAG first RAGAS evaluation scores" width="100%"/>
+<img src="assets/ragas-evaluation-results.svg" alt="NEXUS RAG 50-question RAGAS evaluation status; scores pending the first full run" width="100%"/>
 
 </div>
 
-### First evaluation results
+### 50-question evaluation results
 
-| RAGAS metric | Score | Questions evaluated | What it measures |
+Scores are **pending** until the updated evaluation script is run against the matching local BGE FAISS index. Previous smaller-run scores are not presented as 50-question results.
+
+| RAGAS metric | Current score | Target questions | What it measures |
 |---|---:|---:|---|
-| **Faithfulness** | **0.792** | 6 | Whether the generated answer is supported by retrieved context |
-| **Answer relevancy** | **0.835** | 6 | Whether the answer addresses the user's question |
-| **Context precision** | **1.000** | 3 | Whether relevant retrieved context is ranked well |
-| **Context recall** | **1.000** | 3 | Whether retrieved context contains the information needed for the reference answer |
+| **Faithfulness** | Pending run | 50 | Whether generated answer claims are supported by retrieved context |
+| **Answer relevancy** | Pending run | 50 | Whether the answer addresses the user's question |
+| **Context precision** | Pending run | 46 | Whether relevant retrieved context is ranked well; answerable questions only |
+| **Context recall** | Pending run | 46 | Whether retrieved context contains the information needed for the reference answer; answerable questions only |
 
 <div align="center">
 
-<img src="assets/ragas-evaluation-coverage.svg" alt="NEXUS RAG evaluation dataset coverage and configuration" width="100%"/>
+<img src="assets/ragas-evaluation-coverage.svg" alt="NEXUS RAG 50-question evaluation coverage: 46 answerable and 4 unanswerable" width="100%"/>
 
 </div>
 
 ### Evaluation setup
 
 - **Evaluation framework:** RAGAS
-- **Retriever for the historical reported run:** README records LangChain EnsembleRetriever (FAISS + BM25), weights 0.5 / 0.5, Top-K 5.
-- **Current evaluation script:** direct FAISS retrieval, Top-K 4, first 3 rows only; it is not aligned with that historical run.
-- **Answer model:** Groq `openai/gpt-oss-120b` (Gemini configured as fallback in the application)
+- **Dataset:** 50 questions — 46 answerable and 4 unanswerable
+- **Retrieval:** the same FAISS + BM25 `EnsembleRetriever` used by the application
+- **Retriever weights:** FAISS 0.5 / BM25 0.5
+- **Top-K:** 5 from each retriever before ensemble fusion
+- **Answer model:** Groq `openai/gpt-oss-120b` (Gemini fallback remains configured in the application)
 - **Evaluation judge:** Groq OpenAI-compatible API
-- **Dataset:** 6 questions — 3 answerable and 3 unanswerable
+- **Answer Relevancy evaluator embeddings:** `BAAI/bge-small-en-v1.5`
 
-The question-level scores are recorded in [`evaluation/first-ragas-run.csv`](evaluation/first-ragas-run.csv).
-
-> [!IMPORTANT]
-> These are the results of an **initial, small-sample baseline**, not a general accuracy claim or a production benchmark. Context Precision and Context Recall were calculated only for the **3 answerable questions**; Faithfulness and Answer Relevancy were calculated for all **6 questions**. A larger, human-verified test set is needed before drawing strong conclusions.
-
-### What the first run suggests
-
-- **Faithfulness (0.792)** is the first area to investigate: inspect answer claims that may not be fully supported by the retrieved passages.
-- **Answer relevancy (0.835)** provides a baseline for how directly the answers address the questions.
-- **Context Precision and Recall (1.000 each)** are encouraging on the three answerable test cases, but the sample is too small to establish robust retrieval performance.
+Faithfulness and Answer Relevancy are calculated for all 50 questions. Context Precision and Context Recall are calculated only for the 46 answerable questions because those metrics compare retrieved evidence with a reference answer. Unanswerable questions are still retained in the dataset to check whether the application can recognize missing information.
 
 ### Reproduce the evaluation
 
-Install the evaluation dependencies and prepare the local FAISS index and test dataset:
+First, build the local `faiss_index_bge` index using the same source documents referenced by the dataset. The index must use the current BGE embedding model. Set both `GROQ_API_KEY` and `GOOGLE_API_KEY` in your environment or `.env` file, because the `Rag` application class initializes both providers.
+
+Install the evaluation dependencies and run all rows:
 
 ```bash
 pip install -U ragas pandas openai sentence-transformers python-dotenv
 python evaluation.py
 ```
 
-See [`evaluation.py`](evaluation.py) and [`test_dataset.csv`](test_dataset.csv). The script evaluates the local index; the same source documents used to build that index must be available for the test questions.
+The script checks that the CSV contains exactly 50 rows, evaluates every question, and writes question-level answers, retrieved contexts, sources, and metric scores to `evaluation_results.csv`. It saves progress after every question and prints the average of successfully scored rows at the end. The results file is local and git-ignored.
+
+> [!IMPORTANT]
+> The 50-question set is the configured evaluation suite, not a measured model score. Scores remain pending until you run the script with the matching source documents, local BGE index, and API credentials. Do not interpret the previous baseline CSV as the result of this expanded dataset.
 
 ## ❓ FAQ
 
@@ -493,10 +495,10 @@ Uploads go through temporary storage and indexes live on the host's local filesy
 
 ## 🎤 Project summary
 
-> *NEXUS RAG is a document question-answering application built with Python, Streamlit, LangChain, Qwen3 embeddings and FAISS. It combines BM25 keyword search with FAISS semantic search through an `EnsembleRetriever`, and uses Groq with a Gemini fallback to generate answers grounded in uploaded PDF, TXT, DOCX and CSV documents.*
+> *NEXUS RAG is a document question-answering application built with Python, Streamlit, LangChain, BGE-small embeddings and FAISS. It combines BM25 keyword search with FAISS semantic search through an `EnsembleRetriever`, and uses Groq with a Gemini fallback to generate answers grounded in uploaded PDF, TXT, DOCX and CSV documents.*
 
 ```text
-UPLOAD → LOAD & EXTRACT → CHUNK (1000/200) → QWEN3 EMBEDDINGS → FAISS INDEX
+UPLOAD → LOAD & EXTRACT → CHUNK (1000/100) → BGE-SMALL EMBEDDINGS → FAISS INDEX
       → BM25 + FAISS HYBRID RETRIEVAL → CONTEXT → GROQ (GEMINI FALLBACK) → GROUNDED ANSWER
 ```
 
