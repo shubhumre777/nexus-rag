@@ -399,26 +399,27 @@ NEXUS RAG is a **portfolio / demo project**, not a hardened multi-tenant platfor
 
 ## 🧪 RAGAS evaluation
 
-NEXUS RAG includes a **50-question evaluation dataset** in [`test_dataset.csv`](test_dataset.csv). The dataset contains **46 answerable** and **4 unanswerable** questions covering the campus-policy topics represented in the test set.
-
-The evaluation script now uses the same **FAISS + BM25 EnsembleRetriever** as the application, with the same 0.5 / 0.5 fusion weights and Top-K 5 setting for each retriever. It no longer limits evaluation to a subset of the CSV.
+NEXUS RAG includes a **50-question evaluation dataset** in [`test_dataset.csv`](test_dataset.csv), containing **46 answerable** and **4 unanswerable** questions. The expanded evaluation script runs all 50 questions using the application's FAISS + BM25 hybrid retriever.
 
 <div align="center">
 
-<img src="assets/ragas-evaluation-results.svg" alt="NEXUS RAG 50-question RAGAS evaluation status; scores pending the first full run" width="100%"/>
+<img src="assets/ragas-evaluation-results.svg" alt="NEXUS RAG historical RAGAS baseline scores and 50-question test-set status" width="100%"/>
 
 </div>
 
-### 50-question evaluation results
+### RAGAS results
 
-Scores are **pending** until the updated evaluation script is run against the matching local BGE FAISS index. Previous smaller-run scores are not presented as 50-question results.
+The scores below are the **historical baseline values recorded in the project resume and first evaluation report**. They are real previously reported measurements, not estimates and **not results from the expanded 50-question run**.
 
-| RAGAS metric | Current score | Target questions | What it measures |
-|---|---:|---:|---|
-| **Faithfulness** | Pending run | 50 | Whether generated answer claims are supported by retrieved context |
-| **Answer relevancy** | Pending run | 50 | Whether the answer addresses the user's question |
-| **Context precision** | Pending run | 46 | Whether relevant retrieved context is ranked well; answerable questions only |
-| **Context recall** | Pending run | 46 | Whether retrieved context contains the information needed for the reference answer; answerable questions only |
+| RAGAS metric | Historical baseline score | Baseline questions evaluated | Coverage in the new 50-question run | What it measures |
+|---|---:|---:|---:|---|
+| **Faithfulness** | **0.792** | 6 | 50 | Whether generated answer claims are supported by retrieved context |
+| **Answer relevancy** | **0.835** | 6 | 50 | Whether the answer addresses the user's question |
+| **Context precision** | **1.000** | 3 | 46 answerable | Whether relevant retrieved context is ranked well |
+| **Context recall** | **1.000** | 3 | 46 answerable | Whether retrieved context contains the information needed for the reference answer |
+
+> [!IMPORTANT]
+> The 0.792 / 0.835 / 1.000 / 1.000 values belong to the earlier small-sample baseline (6 questions for Faithfulness and Answer Relevancy; 3 answerable questions for Context Precision and Recall). They must not be presented as 50-question results. The expanded 50-question run has not yet produced verified scores.
 
 <div align="center">
 
@@ -429,31 +430,28 @@ Scores are **pending** until the updated evaluation script is run against the ma
 ### Evaluation setup
 
 - **Evaluation framework:** RAGAS
-- **Dataset:** 50 questions — 46 answerable and 4 unanswerable
-- **Retrieval:** the same FAISS + BM25 `EnsembleRetriever` used by the application
+- **Expanded dataset:** 50 questions — 46 answerable and 4 unanswerable
+- **Retrieval:** FAISS + BM25 `EnsembleRetriever`, matching the application's retriever
 - **Retriever weights:** FAISS 0.5 / BM25 0.5
 - **Top-K:** 5 from each retriever before ensemble fusion
 - **Answer model:** Groq `openai/gpt-oss-120b` (Gemini fallback remains configured in the application)
 - **Evaluation judge:** Groq OpenAI-compatible API
 - **Answer Relevancy evaluator embeddings:** `BAAI/bge-small-en-v1.5`
 
-Faithfulness and Answer Relevancy are calculated for all 50 questions. Context Precision and Context Recall are calculated only for the 46 answerable questions because those metrics compare retrieved evidence with a reference answer. Unanswerable questions are still retained in the dataset to check whether the application can recognize missing information.
+Faithfulness and Answer Relevancy are calculated for all 50 questions. Context Precision and Context Recall are calculated only for the 46 answerable questions because those metrics compare retrieved evidence with a reference answer. The four unanswerable questions remain in the set to test whether the RAG system avoids unsupported answers.
 
-### Reproduce the evaluation
+### Reproduce the 50-question evaluation
 
-First, build the local `faiss_index_bge` index using the same source documents referenced by the dataset. The index must use the current BGE embedding model. Set both `GROQ_API_KEY` and `GOOGLE_API_KEY` in your environment or `.env` file, because the `Rag` application class initializes both providers.
-
-Install the evaluation dependencies and run all rows:
+Build the local `faiss_index_bge` index using the same source documents referenced by the dataset. The index must use the current BGE embedding model. Set both `GROQ_API_KEY` and `GOOGLE_API_KEY` in your environment or `.env` file.
 
 ```bash
 pip install -U ragas pandas openai sentence-transformers python-dotenv
 python evaluation.py
 ```
 
-The script checks that the CSV contains exactly 50 rows, evaluates every question, and writes question-level answers, retrieved contexts, sources, and metric scores to `evaluation_results.csv`. It saves progress after every question and prints the average of successfully scored rows at the end. The results file is local and git-ignored.
+The script checks that the CSV has exactly 50 rows, evaluates every question, and saves answers, retrieved contexts, sources and metric scores to `evaluation_results.csv` after each question. It prints the average of successfully scored rows at the end.
 
-> [!IMPORTANT]
-> The 50-question set is the configured evaluation suite, not a measured model score. Scores remain pending until you run the script with the matching source documents, local BGE index, and API credentials. Do not interpret the previous baseline CSV as the result of this expanded dataset.
+> The historical scores above are retained for transparency. Replace or supplement them with a new result only after `evaluation.py` completes against the 50-question dataset and matching BGE index.
 
 ## ❓ FAQ
 
