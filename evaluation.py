@@ -1,6 +1,6 @@
-
 import asyncio
 import os
+
 import pandas as pd
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -17,34 +17,46 @@ from ragas.metrics.collections import (
 
 load_dotenv()
 
-TEST_LIMIT = 3
+DATASET_FILE = "test_dataset.csv"
 OUTPUT_FILE = "evaluation_results.csv"
+EXPECTED_QUESTIONS = 50
+TOP_K = 5
+
+
+def is_answerable(value):
+    """Read True/False values from the CSV consistently."""
+    return str(value).strip().lower() in {"true", "1", "yes"}
 
 
 async def main():
 
-    # Load the existing FAISS database
+    # Load the BGE-based FAISS index and the same hybrid retriever used by the app.
     rag = Rag()
     rag.load_vector_db()
 
-    df = pd.read_csv("test_dataset.csv").head(TEST_LIMIT)
+    df = pd.read_csv(DATASET_FILE)
 
-    required_columns = {"question", "ground_truth"}
-
+    required_columns = {"question", "ground_truth", "answerable"}
     if not required_columns.issubset(df.columns):
         raise ValueError(
-            "CSV must contain question and ground_truth columns."
+            f"{DATASET_FILE} must contain: {', '.join(sorted(required_columns))}"
         )
 
-    if df.empty:
-        raise ValueError("No questions found in the test dataset.")
+    if len(df) != EXPECTED_QUESTIONS:
+        raise ValueError(
+            f"Expected {EXPECTED_QUESTIONS} questions, but found {len(df)}."
+        )
+
+    if df["question"].isna().any() or df["ground_truth"].isna().any():
+        raise ValueError("Dataset contains an empty question or ground_truth.")
+
+    answerable_count = sum(is_answerable(value) for value in df["answerable"])
 
     api_key = os.getenv("GROQ_API_KEY")
-
     if not api_key:
-        raise ValueError("GROQ_API_KEY not found in .env file.")
+        raise ValueError("GROQ_API_KEY not found in environment or .env file.")
 
-    # Connect RAGAS to Groq
+    # Groq is used as the RAGAS evaluation judge.
     client = AsyncOpenAI(
         api_key=api_key,
         base_url="https://api.groq.com/openai/v1",
@@ -55,49 +67,60 @@ async def main():
         client=client,
     )
 
-    embeddings = embedding_factory(
+    # Use the same BGE family as the application for Answer Relevancy scoring.
+    evaluator_embeddings = embedding_factory(
         "huggingface",
-        model="Qwen/Qwen3-Embedding-0.6B",
+        model="BAAI/bge-small-en-v1.5",
         interface="modern",
     )
 
-    # Metrics used to evaluate the RAG system
     metrics = [
         Faithfulness(llm=llm),
-        AnswerRelevancy(llm=llm, embeddings=embeddings),
+        AnswerRelevancy(llm=llm, embeddings=evaluator_embeddings),
         ContextPrecision(llm=llm),
         ContextRecall(llm=llm),
     ]
 
-    retriever = rag.vector_db.as_retriever(
-        search_kwargs={"k": 4}
-    )
-
+    # Results are saved after each question so completed work is not lost.
     results = []
+
+    print(f"Dataset: {len(df)} questions")
+    print(f"Answerable: {answerable_count} | Unanswerable: {len(df) - answerable_count}")
+    print(f"Retriever: FAISS + BM25 | Top-K: {TOP_K}")
 
     for number, (_, row) in enumerate(df.iterrows(), start=1):
 
         question = str(row["question"])
         reference = str(row["ground_truth"])
+        answerable = is_answerable(row["answerable"])
 
         print("\n" + "-" * 60)
         print(f"Question {number}/{len(df)}")
         print(question)
 
         result = {
+            "question_number": number,
             "question": question,
             "ground_truth": reference,
+            "answerable": answerable,
+            "category": row.get("category", ""),
+            "source_file": row.get("source_file", ""),
             "answer": None,
             "retrieved_contexts": None,
             "retrieved_sources": None,
+            "faithfulness": None,
+            "answer_relevancy": None,
+            "context_precision": None,
+            "context_recall": None,
+            "error": None,
         }
 
         try:
-            # Find relevant documents for the question
-            docs = retriever.invoke(question)
+            # Use the app's hybrid retriever (not FAISS-only retrieval).
+            docs = rag.ensemble_retriever.invoke(question)
+            docs = docs[:TOP_K]
 
             contexts = [doc.page_content for doc in docs]
-
             sources = list(dict.fromkeys(
                 str(doc.metadata.get("source", "Unknown"))
                 for doc in docs
@@ -106,65 +129,45 @@ async def main():
             result["retrieved_contexts"] = "\n\n---\n\n".join(contexts)
             result["retrieved_sources"] = ", ".join(sources)
 
-            print("\nRetrieved Contexts:")
-
-            if contexts:
-                for i, context in enumerate(contexts, start=1):
-                    print(f"\nContext {i}:")
-                    print(context)
-            else:
-                print("No relevant documents retrieved.")
-
-            # Generate an answer using the retrieved context
-            answer = rag.ask(
-                question,
-                "\n\n".join(contexts)
-            )
-
+            # Generate an answer using the same RAG prompt and LLM chain as the app.
+            answer = rag.ask(question, "\n\n".join(contexts))
             result["answer"] = answer
 
-            print("\nGenerated Answer:")
-            print(answer)
-
-            print("\nExpected Answer:")
-            print(reference)
-
-            # Run each evaluation metric
             for metric in metrics:
 
-                name = metric.name
+                metric_name = metric.name
+
+                # Context Precision / Recall need answer references, so score only
+                # questions whose answers are present in the source documents.
+                if metric_name in ("context_precision", "context_recall") and not answerable:
+                    continue
 
                 try:
-                    if name == "faithfulness":
+                    if metric_name == "faithfulness":
                         score = await metric.ascore(
                             user_input=question,
                             response=answer,
                             retrieved_contexts=contexts,
                         )
 
-                    elif name == "answer_relevancy":
+                    elif metric_name == "answer_relevancy":
                         score = await metric.ascore(
                             user_input=question,
                             response=answer,
                         )
 
-                    elif name in (
-                        "context_precision",
-                        "context_recall"
-                    ):
+                    else:
                         score = await metric.ascore(
                             user_input=question,
                             reference=reference,
                             retrieved_contexts=contexts,
                         )
 
-                    result[name] = score.value
-
-                    print(f"{name}: {score.value:.3f}")
+                    result[metric_name] = score.value
+                    print(f"{metric_name}: {score.value:.3f}")
 
                 except Exception as error:
-                    result[name] = None
-                    print(f"{name} failed: {error}")
+                    print(f"{metric_name} failed: {error}")
 
         except Exception as error:
             result["error"] = str(error)
@@ -172,34 +175,40 @@ async def main():
 
         results.append(result)
 
-        # Save results after every question
-        results_df = pd.DataFrame(results)
+        # Save progress after every question.
+        pd.DataFrame(results).to_csv(OUTPUT_FILE, index=False)
+        print(f"Saved {number}/{len(df)} questions to {OUTPUT_FILE}")
 
-        results_df.to_csv(
-            OUTPUT_FILE,
-            index=False
+    # Print the average of successful scores; missing/failed scores are ignored.
+    results_df = pd.DataFrame(results)
+
+    print("\n" + "=" * 60)
+    print("50-QUESTION RAGAS EVALUATION SUMMARY")
+    print("=" * 60)
+
+    metric_targets = {
+        "faithfulness": len(df),
+        "answer_relevancy": len(df),
+        "context_precision": answerable_count,
+        "context_recall": answerable_count,
+    }
+
+    for metric_name, target_count in metric_targets.items():
+        scores = pd.to_numeric(
+            results_df[metric_name],
+            errors="coerce"
+        ).dropna()
+
+        average = scores.mean() if not scores.empty else float("nan")
+
+        print(
+            f"{metric_name}: {average:.3f} "
+            f"({len(scores)}/{target_count} scored)"
+            if not pd.isna(average)
+            else f"{metric_name}: no scores ({len(scores)}/{target_count} scored)"
         )
 
-        print(f"\nCompleted: {number}/{len(df)}")
-
-    # Calculate the average score for each metric
-    if results:
-
-        results_df = pd.DataFrame(results)
-
-        metric_names = [metric.name for metric in metrics]
-
-        print("\n" + "-" * 60)
-        print("Average Evaluation Scores:")
-
-        average_scores = results_df[metric_names].mean()
-
-        print(average_scores.round(3))
-
-        print(f"\nResults saved to {OUTPUT_FILE}")
-
-    else:
-        print("No evaluation results were generated.")
+    print(f"\nQuestion-level results saved to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
